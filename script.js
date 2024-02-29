@@ -233,22 +233,28 @@ document.querySelector('.down').addEventListener('click', moveTetrominoDown);
 document.querySelector('.rotate').addEventListener('click', rotate);
 
 function onKeyDown(e) {
-    switch(e.key) {
-        case 'ArrowUp': 
-            rotate();
-            break;
-        case 'ArrowDown':
-            moveTetrominoDown();
-            break;
-        case 'ArrowLeft':
-            moveTetrominoLeft();
-            break;
-        case 'ArrowRight':
-            moveTetrominoRight();
-            break;
+    if(e.key == 'Escape') {
+        togglePauseGame();
+    
+        switch(e.key) {
+            case 'ArrowUp': 
+                rotate();
+                break;
+            case 'ArrowDown':
+                moveTetrominoDown();
+                break;
+            case 'ArrowLeft':
+                moveTetrominoLeft();
+                break;
+            case 'ArrowRight':
+                moveTetrominoRight();
+                break;
+        }
     }
     draw();
 }
+
+
 
 function rotateMatrix(matrixTetromino) {
     const N = matrixTetromino.length;
@@ -299,12 +305,24 @@ let timedId = null;
 moveDown();
 
 function startLoop() {
-    setTimeout(()=>{ timedId = requestAnimationFrame(moveDown) }, 700)
+    timedId = setTimeout(()=>{ requestAnimationFrame(moveDown) }, 700)
 }
 
 function stopLoop() {
     cancelAnimationFrame(timedId);
-    timedId = clearTimeout(timedId);
+    clearTimeout(timedId);
+    timedId = null;
+}
+
+let isPaused = false;
+
+function togglePauseGame() {
+    if(isPaused === false) {
+        stopLoop();
+    } else {
+        startLoop();
+    }
+    isPaused = !isPaused;
 }
 
 function isValid () {
