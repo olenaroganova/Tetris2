@@ -54,7 +54,12 @@ function convertPositionToIndex(row, column) {
     return row * PLAYFIELD_COLUMNS + column;
 }
 
-let playField;
+function getRandomElement(array) {
+    const randomIndex = Math.floor(Math.random() * array.length)
+    return array[randomIndex];
+}
+
+let playfield;
 let tetromino;
 
 function generatePlayField() {
@@ -63,26 +68,22 @@ function generatePlayField() {
         document.querySelector('.grid').append(div);
     }
 
-    playField = new Array(PLAYFIELD_ROWS).fill()
+    playfield = new Array(PLAYFIELD_ROWS).fill()
                         .map( () => new Array(PLAYFIELD_COLUMNS).fill(0) );
-   
-    
-
 }
 
-
 function generateTetromino() {
-    const index = Math.floor(Math.random() * TETROMINO_NAMES.length)
-    const name = TETROMINO_NAMES[index];
+    const name = getRandomElement(TETROMINO_NAMES);
     const matrix = TETROMINOES[name];
     const column = PLAYFIELD_COLUMNS / 2 - Math.floor(matrix.length / 2);
+    const rowTetro = -2;
     
 
     tetromino = {
         name,
         matrix,
-        row: 0,
-        column: column,
+        row: rowTetro,
+        column,
     }
 }
 
@@ -91,29 +92,57 @@ function placeTetromino() {
     for (let row = 0; row < matrixSize; row++) {
         for (let column = 0; column < matrixSize; column++) {
             if(tetromino.matrix[row][column]) {
-                playField[tetromino.row + row][tetromino.column + column] = tetromino.name;
+                playfield[tetromino.row + row][tetromino.column + column] = tetromino.name;
             }
         }
     }
+
+    const filledRows = findFilledRows();
+    removeFillRows(filledRows);
     generateTetromino();
 }
 
+function removeFillRows(filledRows) {
+    for(let i = 0; i < filledRows.length; i++) {
+        const row = filledRows[i];
+        dropRowsAbove(row);
+    }
+}
+
+function dropRowsAbove(rowDelete) {
+    for(let row = rowDelete; row > 0; row--) {
+        playfield[row] = playfield[row - 1];
+    }
+}
+
+function findFilledRows() {
+    const fillRows = [];
+    for(let row = 0; row < PLAYFIELD_ROWS; row ++) {
+        let filledColumns = 0;
+        for(let column = 0; column < PLAYFIELD_COLUMNS; column) {
+            if(playfield[row][column] != 0){
+                filledColumns++;
+            }
+        }
+        if(PLAYFIELD_COLUMNS === filledColumns) {
+            fillRows.push(row);
+        }
+    }
+    return fillRows;
+}
 
 generatePlayField();
 generateTetromino();
-
 const cells = document.querySelectorAll('.grid div');
 
 function drawPlayField() {
     for(let row = 0; row < PLAYFIELD_ROWS; row++) {
         for(let column = 0; column < PLAYFIELD_COLUMNS; column++) {
-            if(playField[row][column] == 0) continue;
+            if(playfield[row][column] == 0) continue;
 
-            const name = playField[row][column];
+            const name = playfield[row][column];
             const cellIndex = convertPositionToIndex(row, column);
-            // console.log(cellIndex);
             cells[cellIndex].classList.add(name);
-            
         }
     }
 }
@@ -130,6 +159,7 @@ function drawTetromino() {
             //     tetromino.column + column
             // );
             // cells[cellIndex].innerHTML = showRotated[row][column];
+            if(isOutsideOfTopboard(row)) continue;
             if(!tetromino.matrix[row][column]) continue;
             const cellIndex = convertPositionToIndex(
                 tetromino.row + row,
@@ -228,8 +258,6 @@ function moveTetrominoDown() {
         placeTetromino();
     }
     draw();
-    
-   
 }
 
 function moveTetrominoLeft() {
@@ -238,8 +266,6 @@ function moveTetrominoLeft() {
         tetromino.column += 1;
     }
     draw();
-    
-   
 }
 
 function moveTetrominoRight() {
@@ -248,8 +274,25 @@ function moveTetrominoRight() {
         tetromino.column -= 1;
     }
     draw();
-    
-   
+}
+
+function moveDown() {
+    moveTetrominoDown();
+    draw();
+    stopLoop();
+    startLoop();
+}
+
+let timedId = null;
+moveDown();
+
+function startLoop() {
+    setTimeout(()=>{ timedId = requestAnimationFrame(moveDown) }, 700)
+}
+
+function stopLoop() {
+    cancelAnimationFrame(timedId);
+    timedId = clearTimeout(timedId);
 }
 
 function isValid () {
@@ -264,6 +307,10 @@ function isValid () {
     return true;
 }
 
+function isOutsideOfTopboard(row) {
+    return tetromino.row + row < 0;
+}
+
 function isOutsideOfGameboard (row, column) {
     return tetromino.matrix[row][column] &&
     (   tetromino.column + column < 0 
@@ -274,5 +321,5 @@ function isOutsideOfGameboard (row, column) {
 
 function hasCollisions (row, column) {
     return tetromino.matrix[row][column] 
-     && playField[tetromino.row + row][tetromino.column + column]
+     && playfield[tetromino.row + row][tetromino.column + column];
 }
