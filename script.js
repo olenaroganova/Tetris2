@@ -60,8 +60,11 @@ const TETROMINOES = {
     ],
 
 }
+let totalSeconds = 0;
+let timerInterval;
 let cells;
 init();
+
 
 function init() {
     isGameOver = false;
@@ -71,13 +74,28 @@ function init() {
     moveDown();
     score = 0;
     scoreElement.innerHTML = 0;
+    timerInterval = setInterval(updateTimer, 1000);
 }
+
+function updateTimer() {
+    totalSeconds++;
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = totalSeconds % 60;
+    document.querySelector('.timer').innerText = `${minutes} : ${seconds}`;
+}
+
 
 btnRestart.addEventListener('click', function() {
     document.querySelector('.grid').innerHTML = '';
     overlay.style.display = 'none';
+    clearInterval(timerInterval);
+    alert('GAME IS OVER. YOUR TIME IS: ' + document.querySelector('.timer').innerText)
+    totalSeconds = 0;
     init();
 })
+
+
+
 
 function convertPositionToIndex(row, column) {
     return row * PLAYFIELD_COLUMNS + column;
