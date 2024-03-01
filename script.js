@@ -1,5 +1,3 @@
-
-
 const btnRestart = document.querySelector('.btn-restart');
 const scoreElement = document.querySelector('.score');
 const overlay = document.querySelector('.overlay');
@@ -10,6 +8,7 @@ let score = 0;
 let isGameOver = false;
 let timedId = null;
 let isPaused = false;
+
 const PLAYFIELD_COLUMNS = 10;
 const PLAYFIELD_ROWS = 20;
 const TETROMINO_NAMES = [
@@ -60,11 +59,11 @@ const TETROMINOES = {
     ],
 
 }
+
 let totalSeconds = 0;
 let timerInterval;
 let cells;
 init();
-
 
 function init() {
     isGameOver = false;
@@ -84,7 +83,6 @@ function updateTimer() {
     document.querySelector('.timer').innerText = `${minutes} : ${seconds}`;
 }
 
-
 btnRestart.addEventListener('click', function() {
     document.querySelector('.grid').innerHTML = '';
     overlay.style.display = 'none';
@@ -93,9 +91,6 @@ btnRestart.addEventListener('click', function() {
     totalSeconds = 0;
     init();
 })
-
-
-
 
 function convertPositionToIndex(row, column) {
     return row * PLAYFIELD_COLUMNS + column;
@@ -168,7 +163,6 @@ function placeTetromino() {
     removeFillRows(filledRows);
     generateTetromino();
     countScore(filledRows.length);
-
 }
 
 function removeFillRows(filledRows) {
@@ -201,8 +195,6 @@ function findFilledRows() {
     }
     return fillRows;
 }
-
-
 
 function drawPlayField() {
     for(let row = 0; row < PLAYFIELD_ROWS; row++) {
@@ -257,19 +249,10 @@ function rotateTetromino() {
     }
 }
 
-// let showRotated = [
-//     [1,2,3],
-//     [4,5,6],
-//     [7,8,9]
-// ]
-
-// draw();
-
 function rotate() {
     rotateTetromino();
     draw();
 }
-
 
 document.addEventListener('keydown', onKeyDown);
 document.querySelector('.left').addEventListener('click', moveTetrominoLeft);
@@ -319,7 +302,6 @@ function rotateMatrix(matrixTetromino) {
             rotateMatrix[i][j] = matrixTetromino[N - j - 1][i];
         }
     }
-    
     return rotateMatrix;
 }
 
@@ -413,3 +395,25 @@ function hasCollisions (row, column) {
     return tetromino.matrix[row][column] 
      && playfield[tetromino.row + row]?.[tetromino.column + column];
 }
+
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space') {
+        e.preventDefault(); 
+    }
+});
+
+document.querySelector('.newgame').addEventListener('click', function() {
+    document.querySelector('.grid').innerHTML = '';
+    overlay.style.display = 'none';
+    clearInterval(timerInterval);
+    totalSeconds = 0;
+    init();
+})
+
+// let showRotated = [
+//     [1,2,3],
+//     [4,5,6],
+//     [7,8,9]
+// ]
+
+// draw();
